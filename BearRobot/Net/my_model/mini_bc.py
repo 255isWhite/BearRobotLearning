@@ -11,7 +11,7 @@ from BearRobot.Net.my_model.FiLM import FiLM_layer
 from BearRobot.Net.encoder.DecisionNCE import DecisionNCE_encoder, DecisionNCE_visual, DecisionNCE_lang
 from . import LANG_EMB_DIM
 
-class MiniBC_pretrain(nn.Moudle):
+class MiniBC_pretrain(nn.Module):
         """
         the mini behavior cloning model that uses pretrained mult-modal backbone
         """
@@ -59,6 +59,7 @@ class MiniBC_pretrain(nn.Moudle):
             self.lang_dim = 1024
             self.img_size = 0
             
+            self.encode_s, self.encode_a = encode_s, encode_a
             self.s_dim = s_dim
             if encode_s and s_dim>0:
                 self.state_encoder = nn.Linear(s_dim, hidden_dim) 
@@ -70,6 +71,7 @@ class MiniBC_pretrain(nn.Moudle):
             
             input_dim = self.visual_dim * view_num + self.lang_dim + self.s_dim
             self.decoder = MLP(input_dim,[hidden_dim,hidden_dim],output_dim)
+
             
         
         def forward(self, imgs: torch.Tensor, texts: torch.Tensor, state: torch.Tensor=None):
@@ -87,13 +89,15 @@ class MiniBC_pretrain(nn.Moudle):
             
             ## Text embeddings
             if isinstance(texts, list):
-                text_embeddings = self.lang_encoder(texts)
+                text_embeddings = self.lang_encoder.embed_text(texts)
+            elif isinstance(texts, torch.Tensor):
+                text_embeddings = texts
             else:
                 raise ValueError(f"Need type [list], but got type [{type(texts)}]")
             
             input_embeddings = torch.concat([img_embeddings, text_embeddings, state_embeddings], dim=-1)\
                 if state_embeddings is not None else torch.concat([img_embeddings, text_embeddings], dim=-1)
-                
+
             action_pred = self.decoder(input_embeddings)
 
             return action_pred

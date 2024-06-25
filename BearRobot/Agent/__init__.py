@@ -12,6 +12,8 @@ from BearRobot.Agent.ddpm_bc import VLDDPM_BC
 from BearRobot.Agent.ACT import ACTAgent 
 from BearRobot.Net.my_model.diffusion_model import VisualDiffusion, VisualDiffusion_pretrain
 from BearRobot.Net.my_model.ACT_model import ACTModel
+from BearRobot.Net.my_model.mini_bc import MiniBC_pretrain
+from BearRobot.Agent.mini_agent import MiniBC_Agent
 
 
 def openjson(path):
@@ -127,6 +129,20 @@ def build_visual_diffusion_mmpretrain(ckpt_path: str, statistics_path: str, wand
         agent.get_transform(img_size=0, transform_list=transform_list)
         return load_ckpt(agent, ckpt_path)
 
+def build_minibc(ckpt_path: str, statistics_path: str, wandb_name: str=None, wandb_path: str=None):
+        kwargs = wandb_yaml2dict(ckpt_path, wandb_name, wandb_path=wandb_path)
+        model = MiniBC_pretrain(view_num=2,
+                                output_dim=7 * kwargs['ac_num'],
+                                **kwargs).to(0)
+        agent = MiniBC_Agent(model, ac_num=kwargs['ac_num'], lang_encoder=kwargs['mm_encoder']) 
+        agent.get_statistics(statistics_path)
+        
+        import torchvision.transforms as T
+        transform_list  = [
+              T.ToTensor(),
+        ]
+        agent.get_transform(img_size=0, transform_list=transform_list)
+        return load_ckpt(agent, ckpt_path)
 
 # def build_visual_diffusino(ckpt_path: str, statistics_path: str, wandb_name: str=None):
 #         model = VisualDiffusion(img_size=224, 

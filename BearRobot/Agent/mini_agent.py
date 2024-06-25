@@ -16,11 +16,13 @@ from BearRobot.Net.encoder.DecisionNCE import DecisionNCE_encoder, DecisionNCE_l
 class MiniBC_Agent(BaseAgent):
     def __init__(
         self,
-        policy: torch.nn.Moudle,
-        lang_encoder: str="DecisionNCE-T"
+        policy: torch.nn.Module,
+        lang_encoder: str="DecisionNCE-T",
+        ac_num: int=1,
+        **kwargs
     ):
         super().__init__(
-            policy, None, None
+            policy, None, None, ac_num=ac_num
         )
 
         assert lang_encoder in ['DecisionNCE-T', 'DecisionNCE-P'], f"lang_encoder {lang_encoder} not supported"
@@ -97,7 +99,7 @@ class MiniBC_Agent(BaseAgent):
             output_dim = self.policy.output_dim
         except:
             output_dim = self.policy.module.output_dim
-        action = self.predict_action().detach().cpu()
+        action = self.predict_action(imgs,[lang]*B,state).detach().cpu()
         action = action.view(B, -1, 7)
         
         B, N, D_a = action.shape

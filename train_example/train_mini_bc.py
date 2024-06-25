@@ -53,7 +53,9 @@ def main(args):
        torch.cuda.manual_seed_all(seed)
        random.seed(seed)
        torch.backends.cudnn.deterministic = True
-       
+       print(torch.cuda.is_available())
+       print(torch.cuda.device_count())
+
        # init ddp
        global_rank, rank, _ = ddp.ddp_setup_universal(True, args)
        kwargs['device'] = rank
@@ -68,8 +70,8 @@ def main(args):
        # dataset and dataloader
        view_list = ['D435_image', 'wrist_image']
        rt1dataloader, statistics = AIRKitchenDataLoader(
-              base_dir='/home/dodo/ljx/BearRobot/data/libero/dataset/',
-              datalist=['/home/dodo/ljx/BearRobot/data/libero/libero_goal-ac.json'],
+              base_dir='data/',
+              datalist=['data/libero/libero_goal-ac.json'],
               view_list=view_list,
               transform_list=transform_list,
               **kwargs
@@ -95,7 +97,7 @@ def main(args):
        visual_diffusion_policy = MiniBC_pretrain(view_num=len(view_list), 
                                                  output_dim=int(7 * args.ac_num),
                                                  **kwargs).to(rank)
-       agent = MiniBC_Agent(policy=visual_diffusion_policy, text_encoder=kwargs['mm_encoder'],**kwargs)      
+       agent = MiniBC_Agent(policy=visual_diffusion_policy, lang_encoder=kwargs['mm_encoder'],**kwargs)      
        agent.get_statistics(os.path.join(args.save_path, 'statistics.json'))
        agent.get_transform(img_size=0, transform_list=transform_list)
        
