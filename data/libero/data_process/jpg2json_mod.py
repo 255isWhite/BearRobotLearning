@@ -31,7 +31,7 @@ for dataset in tqdm(dataset_lists):
             demo_dir = os.path.join(task_dir, demo)
             
             action = np.load(demo_dir + f"/actions/data_{demo}_actions.npy")
-            state = np.load(demo_dir + f"/states/data_{demo}_states.npy")
+            state = np.load(demo_dir + f"/robot_states/data_{demo}_robot_states.npy")
             
             length = action.shape[0]
             for i in range(length):
@@ -53,5 +53,5 @@ for dataset in tqdm(dataset_lists):
                 count += 1
 
 print('done, data number:', count)
-with open(f"data/libero/{task_suite_name}-states.json", 'w') as f:
+with open(f"data/libero/{task_suite_name}-ac.json", 'w') as f:
     json.dump(data, f, indent=4)

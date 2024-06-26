@@ -59,6 +59,19 @@ class MiniBC_Agent(BaseAgent):
         return: loss
         '''
         action_pred = self.predict_action(imgs, texts, state)
+
+        # normilize action_gt
+        B, D_a = action_pred.shape
+        action_pred = action_pred.view(B, -1, 7)
+        B, N, D_a = action_pred.shape
+        a_max = self.a_max.repeat(B, N, 1).to(action_pred.device)
+        a_min = self.a_min.repeat(B, N, 1).to(action_pred.device)
+
+        action_gt = action_gt.view(B,-1,7)
+        action_gt = action_gt.to(action_pred.device)
+        a_mid = (a_max+a_min)/2
+        action_gt = (action_gt-a_mid)/(a_mid-a_min) # [-1,1]
+
         loss = (((action_pred - action_gt) ** 2).sum(axis = -1)).mean()
         
         return loss
@@ -75,6 +88,7 @@ class MiniBC_Agent(BaseAgent):
         
         Return: [B, D_a] predicted action
         '''
+        state = ((state - self.s_mean.to(state.device)) / self.s_std.to(state.device)) if state is not None else None
         action_pred = self.policy(imgs, texts, state)
         return action_pred
     
