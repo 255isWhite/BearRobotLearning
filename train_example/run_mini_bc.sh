@@ -1,13 +1,13 @@
 bs=64
 ws=2
-path=../experiments/libero/libero_goal/minibc/0622test07
+path=../experiments/libero/libero_goal/minibc/0626test02
 
 export WANDB_API_KEY=0d4d8e6f87ec9508a673bb4f0d117bf6a79a9945
-torchrun --standalone --nnodes=1 --nproc_per_node=1 train_example/train_mini_bc.py \
+torchrun --standalone --nnodes=1 --nproc_per_node=6 train_example/train_mini_bc.py \
     --seed 42 \
     --dataset 'libero_goal' \
     --algo_name 'Mini BC with pretrained DecisionNCE-T' \
-    --ddp False \
+    --ddp True \
     --mm_encoder DecisionNCE-T \
     --ft_mmencoder False \
     --film_fusion False \

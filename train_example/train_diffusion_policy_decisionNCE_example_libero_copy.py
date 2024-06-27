@@ -5,8 +5,8 @@ import random
 import torch
 import numpy as np
 
-from BearRobot.Net.my_model.mini_bc import MiniBC_pretrain
-from BearRobot.Agent.mini_agent import MiniBC_Agent
+from BearRobot.Net.my_model.diffusion_model import VisualDiffusion, VisualDiffusion_pretrain
+from BearRobot.Agent.ddpm_bc import VLDDPM_BC
 
 from BearRobot.utils.dataset.dataloader import RT1DataLoader, RT1ValDataLoader, AIRKitchenDataLoader, AIRKitchenValDataLoader
 from BearRobot.utils.logger.tb_log import TensorBoardLogger as Logger
@@ -40,6 +40,8 @@ def get_args():
        parser.add_argument('--hidden_dim', default=256, type=int, help='hidden dim for decoder MLP')
        parser.add_argument('--film_fusion', default=False, type=boolean, help='add film condition to the decoder')
        
+       
+       parser = diffusion_args(parser)
        args = parser.parse_args()    
        return args   
 
@@ -53,9 +55,7 @@ def main(args):
        torch.cuda.manual_seed_all(seed)
        random.seed(seed)
        torch.backends.cudnn.deterministic = True
-       print(torch.cuda.is_available())
-       print(torch.cuda.device_count())
-
+       
        # init ddp
        global_rank, rank, _ = ddp.ddp_setup_universal(True, args)
        kwargs['device'] = rank
@@ -94,10 +94,10 @@ def main(args):
        wandb_logger = Logger(args.project_name, args.dataset_name, args, save_path=args.log_path, rank=global_rank) 
 
        # agent and the model for agent
-       policy = MiniBC_pretrain(view_num=len(view_list), 
-                                          output_dim=int(7 * args.ac_num),
-                                          **kwargs).to(rank)
-       agent = MiniBC_Agent(policy=policy, lang_encoder=kwargs['mm_encoder'],**kwargs)      
+       visual_diffusion_policy = VisualDiffusion_pretrain(view_num=len(view_list), 
+                                                 output_dim=int(7 * args.ac_num),
+                                                 **kwargs).to(rank)
+       agent = VLDDPM_BC(policy=visual_diffusion_policy, text_encoder=kwargs['mm_encoder'],**kwargs)      
        agent.get_statistics(os.path.join(args.save_path, 'statistics.json'))
        agent.get_transform(img_size=0, transform_list=transform_list)
        

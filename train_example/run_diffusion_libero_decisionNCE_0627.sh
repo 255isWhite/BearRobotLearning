@@ -1,7 +1,7 @@
 bs=64
 ws=2
 export WANDB_API_KEY=0d4d8e6f87ec9508a673bb4f0d117bf6a79a9945
-torchrun --standalone --nnodes=1 --nproc-per-node=6 train_diffusion_policy_decisionNCE_example_libero.py \
+torchrun --standalone --nnodes=1 --nproc_per_node=6 train_example/train_diffusion_policy_decisionNCE_example_libero_copy.py \
     --seed 42 \
     --dataset 'libero_goal' \
     --algo_name 'dnce diffusion visual motor' \
@@ -19,13 +19,13 @@ torchrun --standalone --nnodes=1 --nproc-per-node=6 train_diffusion_policy_decis
     --world_size $ws \
     --lr 0.0003 \
     --val_freq 10000000 \
-    --eval_freq 25000 \
+    --eval_freq 100000000 \
     --resume None \
     --wandb True \
-    --steps 2000000 \
+    --steps 50000 \
     --save True \
-    --save_freq 25000 \
+    --save_freq 10000 \
     --T 25 \
-    --save_path ../experiments/libero/libero_goal/diffusion_dnce/test_0613_ftimg \
-    --log_path ../experiments/libero/libero_goal/diffusion_dnce/test_0613_ftimg \
+    --save_path ../experiments/libero/libero_goal/diffusion_dnce/0627test01 \
+    --log_path ../experiments/libero/libero_goal/diffusion_dnce/0627test01 \
     --port 2052 \

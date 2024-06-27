@@ -61,17 +61,24 @@ class MiniBC_Agent(BaseAgent):
         action_pred = self.predict_action(imgs, texts, state)
 
         # normilize action_gt
-        B, D_a = action_pred.shape
-        action_pred = action_pred.view(B, -1, 7)
-        B, N, D_a = action_pred.shape
-        a_max = self.a_max.repeat(B, N, 1).to(action_pred.device)
-        a_min = self.a_min.repeat(B, N, 1).to(action_pred.device)
+        # B, D_a = action_pred.shape
+        # action_pred = action_pred.view(B, -1, 7)
+        # B, N, D_a = action_pred.shape
+        # a_max = self.a_max.repeat(B, N, 1).to(action_pred.device)
+        # a_min = self.a_min.repeat(B, N, 1).to(action_pred.device)
 
-        action_gt = action_gt.view(B,-1,7)
-        action_gt = action_gt.to(action_pred.device)
-        a_mid = (a_max+a_min)/2
-        action_gt = (action_gt-a_mid)/(a_mid-a_min) # [-1,1]
+        # action_gt = action_gt.view(B,-1,7)
+        # action_gt = action_gt.to(action_pred.device)
+        # print("action_gt origin ",action_gt[0][0])
+        # a_mid = (a_max+a_min)/2
+        # action_gt = (action_gt-a_mid)/(a_mid-a_min) # [-1,1]
 
+        # print("action_gt ",action_gt[0][0])
+        # print("action_pred ",action_pred[0][0])
+
+
+        # print("action_gt ",action_gt.view(action_pred.shape[0],-1,7)[0][0])
+        # print("action_pred ",action_pred.view(action_pred.shape[0],-1,7)[0][0])
         loss = (((action_pred - action_gt) ** 2).sum(axis = -1)).mean()
         
         return loss
@@ -88,7 +95,7 @@ class MiniBC_Agent(BaseAgent):
         
         Return: [B, D_a] predicted action
         '''
-        state = ((state - self.s_mean.to(state.device)) / self.s_std.to(state.device)) if state is not None else None
+        # state = ((state - self.s_mean.to(state.device)) / self.s_std.to(state.device)) if state is not None else None
         action_pred = self.policy(imgs, texts, state)
         return action_pred
     
@@ -121,6 +128,7 @@ class MiniBC_Agent(BaseAgent):
         a_min = self.a_min.repeat(B, N, 1)
         a_mean = self.a_mean.repeat(B, N, 1)
         a_std = self.a_std.repeat(B, N, 1)
+        # print("action is ",action[0][0])
         
         action = (action + 1) * (a_max - a_min) / 2 + a_min
         action = self.get_ac_action(action.numpy(), t, k)
